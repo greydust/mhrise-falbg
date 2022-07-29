@@ -1,14 +1,22 @@
-local DEFAULT_TRIGGER = 2048
+local DEFAULT_GAMEPAD_TRIGGER = 2048
+local DEFAULT_MOUSE_TRIGGER = 1
 
 local PadButtons = require("falbg.pad_buttons")
+local MouseButtons = require("falbg.mouse_buttons")
+
 local padDevice = sdk.find_type_definition("snow.Pad.Device");
+local mouseDevice = sdk.find_type_definition("snow.StmMouse.HardwareDevice");
 
 local settings = {
     enabled = true,
-    trigger = DEFAULT_TRIGGER,
+    enableGamepad = true,
+    gamepadTrigger = DEFAULT_GAMEPAD_TRIGGER,
+    enableMouse = true,
+    mouseTrigger = DEFAULT_MOUSE_TRIGGER,
 }
 local playerManager = nil;
-local appGamePad = nil
+local appGamepad = nil
+local hardwareMouse = nil;
 
 local function saveSettings()
 	json.dump_file("falbg.json", settings)
@@ -17,14 +25,8 @@ end
 local function loadSettings()
 	local loadedSettings = json.load_file("falbg.json")
 	if loadedSettings then
-		settings = loadedSettings
+        for k,v in pairs(loadedSettings) do settings[k] = v end
 	end
-    if settings.enabled == nil then
-        settings.enabled = true
-    end
-    if settings.trigger == nil then
-        setting.trigger = DEFAULT_TRIGGER
-    end
 end
 
 loadSettings()
@@ -45,12 +47,25 @@ end
 
 sdk.hook(padDevice:get_method("update"), function(args) end,
 function(retval)
-    if settings.enabled and appGamePad and isUsingLbg() then
-        local on = appGamePad:get_field("_on")
-        if on & settings.trigger ~= 0 then
-            local trg = appGamePad:get_field("_trg")
-            trg = trg | settings.trigger
-            appGamePad:set_field("_trg", trg)
+    if settings.enabled and settings.enableGamepad and appGamepad and isUsingLbg() then
+        local on = appGamepad:get_field("_on")
+        if on & settings.gamepadTrigger ~= 0 then
+            local trg = appGamepad:get_field("_trg")
+            trg = trg | settings.gamepadTrigger
+            appGamepad:set_field("_trg", trg)
+        end
+    end
+    return retval
+end)
+
+sdk.hook(mouseDevice:get_method("update"), function(args) end,
+function(retval)
+    if settings.enabled and settings.enableMouse and hardwareMouse and isUsingLbg() then
+        local on = hardwareMouse:get_field("_on")
+        if on & settings.mouseTrigger ~= 0 then
+            local trg = hardwareMouse:get_field("_trg")
+            trg = trg | settings.mouseTrigger
+            hardwareMouse:set_field("_trg", trg)
         end
     end
     return retval
@@ -61,19 +76,32 @@ re.on_pre_application_entry("UpdateBehavior", function()
         playerManager = sdk.get_managed_singleton("snow.player.PlayerManager")
     end
 
-    if not appGamePad then
-        appGamePad = sdk.get_managed_singleton("snow.Pad"):get_field("app")
+    if not appGamepad then
+        appGamepad = sdk.get_managed_singleton("snow.Pad"):get_field("app")
+    end
+
+    if not hardwareMouse then
+        hardwareMouse = sdk.get_managed_singleton("snow.StmMouse"):get_field("hardmouse")
     end
 end)
 
-local settingTrigger = false
+local settingGamepadTrigger = false
+local settingMouseTrigger = false
 re.on_draw_ui(function()
-    if settingTrigger then
-        settings.trigger = 0
-        local button = appGamePad:call("get_on")
+    if settingGamepadTrigger then
+        settings.gamepadTrigger = 0
+        local button = appGamepad:call("get_on")
         if button > 0 and PadButtons[button] ~= nil then
-            settings.trigger = button
-            settingTrigger = false
+            settings.gamepadTrigger = button
+            settingGamepadTrigger = false
+        end
+    end
+    if settingMouseTrigger then
+        settings.mouseTrigger = 0
+        local button = hardwareMouse:call("get_on")
+        if button > 0 and MouseButtons[button] ~= nil then
+            settings.mouseTrigger = button
+            settingMouseTrigger = false
         end
     end
 
@@ -88,13 +116,34 @@ re.on_draw_ui(function()
             saveSettings()
         end
 
-        imgui.text("Trigger")
+        imgui.new_line()
+
+        changed, value = imgui.checkbox("Enable Gamepad", settings.enableGamepad)
+        if changed then
+            settings.enableGamepad = value
+            saveSettings()
+        end
+        imgui.text("Gamepad Trigger")
         imgui.same_line()
-        if imgui.button(PadButtons[settings.trigger]) then
-            if appGamePad then
-                settingTrigger = true
+        if imgui.button(PadButtons[settings.gamepadTrigger]) then
+            if appGamepad then
+                settingGamepadTrigger = true
             end
         end
+
+        changed, value = imgui.checkbox("Enable Mouse", settings.enableMouse)
+        if changed then
+            settings.enableMouse = value
+            saveSettings()
+        end
+        imgui.text("Mouse Trigger")
+        imgui.same_line()
+        if imgui.button(MouseButtons[settings.mouseTrigger]) then
+            if hardwareMouse then
+                settingMouseTrigger = true
+            end
+        end
+
 
         imgui.tree_pop();
     end
