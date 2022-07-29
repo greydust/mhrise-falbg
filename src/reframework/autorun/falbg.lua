@@ -67,8 +67,6 @@ re.on_draw_ui(function()
     if settingTrigger then
         settings.trigger = 0
         local button = appGamePad:call("get_on")
-        draw.text(tostring(button), 551, 11, 0xFF000000);
-		draw.text(tostring(button), 550, 10, 0xFFFFFFFF);
         if button > 0 and PadButtons[button] ~= nil then
             settings.trigger = button
             settingTrigger = false
