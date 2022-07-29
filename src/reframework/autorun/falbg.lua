@@ -32,8 +32,9 @@ loadSettings()
 local function isUsingLbg()
     if playerManager then
         local players = playerManager:get_field("PlayerList")
-        if #players > 0 then
-            local player = players[0]
+        local playerId = playerManager:call("getMasterPlayerID")
+        if #players > playerId then
+            local player = players[playerId]
             if player and player:get_type_definition():get_full_name() == "snow.player.LightBowgun" then
                 return true
             end
