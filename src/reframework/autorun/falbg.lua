@@ -7,8 +7,13 @@ local MouseButtons = require("falbg.mouse_buttons")
 local padDevice = sdk.find_type_definition("snow.Pad.Device");
 local mouseDevice = sdk.find_type_definition("snow.StmMouse.HardwareDevice");
 
+local lbg = "snow.player.LightBowgun"
+local bow = "snow.player.Bow"
+local delay = 3
+
 local settings = {
-    enabled = true,
+    lbgEnabled = true,
+    bowEnabled = false,
     enableGamepad = true,
     gamepadTrigger = DEFAULT_GAMEPAD_TRIGGER,
     enableMouse = false,
@@ -31,28 +36,36 @@ end
 
 loadSettings()
 
-local function isUsingLbg()
+local function isUsing(weapon)
     if playerManager then
         local players = playerManager:get_field("PlayerList")
         local playerId = playerManager:call("getMasterPlayerID")
         if #players > playerId then
             local player = players[playerId]
-            if player and player:get_type_definition():get_full_name() == "snow.player.LightBowgun" then
+            if player and player:get_type_definition():get_full_name() == weapon then
                 return true
             end
         end
     end
     return false
 end
-
+local count = 0
 sdk.hook(padDevice:get_method("update"), function(args) end,
 function(retval)
-    if settings.enabled and settings.enableGamepad and appGamepad and isUsingLbg() then
+    if  settings.enableGamepad and appGamepad and ((settings.lbgEnabled and isUsing(lbg)) or (settings.bowEnabled and isUsing(bow))) then
         local on = appGamepad:get_field("_on")
         if on & settings.gamepadTrigger ~= 0 then
-            local trg = appGamepad:get_field("_trg")
-            trg = trg | settings.gamepadTrigger
-            appGamepad:set_field("_trg", trg)
+            print("Count: ",count)
+            if count / delay >= 1 then
+                local trg = appGamepad:get_field("_trg")
+                trg = trg | settings.gamepadTrigger
+                appGamepad:set_field("_trg",trg)
+                count = 0
+            else
+                appGamepad:set_field("_on",0)
+                appGamepad:set_field("_trg",0)
+                count = count + 1
+            end
         end
     end
     return retval
@@ -60,7 +73,7 @@ end)
 
 sdk.hook(mouseDevice:get_method("update"), function(args) end,
 function(retval)
-    if settings.enabled and settings.enableMouse and hardwareMouse and isUsingLbg() then
+    if  settings.enableMouse and hardwareMouse and ((settings.lbgEnabled and isUsing(lbg)) or (settings.bowEnabled and isUsing(bow))) then
         local on = hardwareMouse:get_field("_on")
         if on & settings.mouseTrigger ~= 0 then
             local trg = hardwareMouse:get_field("_trg")
@@ -105,14 +118,20 @@ re.on_draw_ui(function()
         end
     end
 
-    if imgui.tree_node("Fully Automatic LBG") then
+    if imgui.tree_node("Fully Automatic LBG & Bow") then
 		if imgui.button("Save Settings") then
 			saveSettings();
 		end
 
-        changed, value = imgui.checkbox("Enabled", settings.enabled)
+        changed, value = imgui.checkbox("LBG Enabled", settings.lbgEnabled)
         if changed then
-            settings.enabled = value
+            settings.lbgEnabled = value
+            saveSettings()
+        end
+
+        changed, value = imgui.checkbox("Bow Enabled", settings.bowEnabled)
+        if changed then
+            settings.bowEnabled = value
             saveSettings()
         end
 
