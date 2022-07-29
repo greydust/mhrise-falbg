@@ -29,20 +29,27 @@ end
 
 loadSettings()
 
-sdk.hook(padDevice:get_method("update"), function(args) end,
-function(retval)
-    if settings.enabled and appGamePad and playerManager then
+local function isUsingLbg()
+    if playerManager then
         local players = playerManager:get_field("PlayerList")
         if #players > 0 then
             local player = players[0]
             if player and player:get_type_definition():get_full_name() == "snow.player.LightBowgun" then
-                local on = appGamePad:get_field("_on")
-                if on & settings.trigger ~= 0 then
-                    local trg = appGamePad:get_field("_trg")
-                    trg = trg | settings.trigger
-                    appGamePad:set_field("_trg", trg)
-                end
+                return true
             end
+        end
+    end
+    return false
+end
+
+sdk.hook(padDevice:get_method("update"), function(args) end,
+function(retval)
+    if settings.enabled and appGamePad and isUsingLbg() then
+        local on = appGamePad:get_field("_on")
+        if on & settings.trigger ~= 0 then
+            local trg = appGamePad:get_field("_trg")
+            trg = trg | settings.trigger
+            appGamePad:set_field("_trg", trg)
         end
     end
     return retval
