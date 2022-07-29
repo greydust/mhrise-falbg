@@ -4,7 +4,8 @@ local PadButtons = require("falbg.pad_buttons")
 local padDevice = sdk.find_type_definition("snow.Pad.Device");
 
 local settings = {
-    trigger = DEFAULT_TRIGGER
+    enabled = true,
+    trigger = DEFAULT_TRIGGER,
 }
 local questManager = nil
 local appGamePad = nil
@@ -18,7 +19,10 @@ local function loadSettings()
 	if loadedSettings then
 		settings = loadedSettings
 	end
-    if not settings.trigger then
+    if settings.enabled == nil then
+        settings.enabled = true
+    end
+    if settings.trigger == nil then
         setting.trigger = DEFAULT_TRIGGER
     end
 end
@@ -27,7 +31,7 @@ loadSettings()
 
 sdk.hook(padDevice:get_method("update"), function(args) end,
 function(retval)
-    if appGamePad and playerManager then
+    if settings.enabled and appGamePad and playerManager then
         local players = playerManager:get_field("PlayerList")
         if #players > 0 then
             local player = players[0]
@@ -75,6 +79,12 @@ re.on_draw_ui(function()
 		if imgui.button("Save Settings") then
 			saveSettings();
 		end
+
+        changed, value = imgui.checkbox("Enabled", settings.enabled)
+        if changed then
+            settings.enabled = value
+            saveSettings()
+        end
 
         imgui.text("Trigger")
         imgui.same_line()
