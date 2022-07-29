@@ -11,7 +11,7 @@ local settings = {
     enabled = true,
     enableGamepad = true,
     gamepadTrigger = DEFAULT_GAMEPAD_TRIGGER,
-    enableMouse = true,
+    enableMouse = false,
     mouseTrigger = DEFAULT_MOUSE_TRIGGER,
 }
 local playerManager = nil;
