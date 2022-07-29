@@ -7,7 +7,7 @@ local settings = {
     enabled = true,
     trigger = DEFAULT_TRIGGER,
 }
-local questManager = nil
+local playerManager = nil;
 local appGamePad = nil
 
 local function saveSettings()
@@ -49,10 +49,6 @@ function(retval)
 end)
 
 re.on_pre_application_entry("UpdateBehavior", function()
-    if not questManager then
-        questManager = sdk.get_managed_singleton("snow.QuestManager")
-    end
-
     if not playerManager then
         playerManager = sdk.get_managed_singleton("snow.player.PlayerManager")
     end
