@@ -52,17 +52,20 @@ end
 local count = 0
 sdk.hook(padDevice:get_method("update"), function(args) end,
 function(retval)
-    if  settings.enableGamepad and appGamepad and ((settings.lbgEnabled and isUsing(lbg)) or (settings.bowEnabled and isUsing(bow))) then
+    if settings.enableGamepad and appGamepad then
         local on = appGamepad:get_field("_on")
-        if on & settings.gamepadTrigger ~= 0 then
-            print("Count: ",count)
+        if settings.bowEnabled and isUsing(bow) and on & settings.gamepadTrigger ~= 0 then
             if count / delay >= 1 then
                 count = 0
             else
                 appGamepad:set_field("_on",on &~ settings.gamepadTrigger)
-                --appGamepad:set_field("_trg",0)
                 count = count + 1
             end
+        end
+        if settings.lbgEnabled and isUsing(lbg) and on & settings.gamepadTrigger ~= 0 then
+            local trg = appGamepad:get_field("_trg")
+            trg = trg | settings.gamepadTrigger
+            appGamepad:set_field("_trg",trg)
         end
     end
     return retval
