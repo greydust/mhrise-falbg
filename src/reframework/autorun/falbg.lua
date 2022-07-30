@@ -9,7 +9,7 @@ local mouseDevice = sdk.find_type_definition("snow.StmMouse.HardwareDevice");
 
 local lbg = "snow.player.LightBowgun"
 local bow = "snow.player.Bow"
-local delay = 3
+local delay = 10
 
 local settings = {
     lbgEnabled = true,
@@ -57,13 +57,10 @@ function(retval)
         if on & settings.gamepadTrigger ~= 0 then
             print("Count: ",count)
             if count / delay >= 1 then
-                local trg = appGamepad:get_field("_trg")
-                trg = trg | settings.gamepadTrigger
-                appGamepad:set_field("_trg",trg)
                 count = 0
             else
-                appGamepad:set_field("_on",0)
-                appGamepad:set_field("_trg",0)
+                appGamepad:set_field("_on",on &~ settings.gamepadTrigger)
+                --appGamepad:set_field("_trg",0)
                 count = count + 1
             end
         end
