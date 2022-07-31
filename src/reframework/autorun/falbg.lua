@@ -79,14 +79,17 @@ re.on_pre_application_entry('UpdateBehavior', function()
     end
 
     if not appGamepad then
-        pad = sdk.get_managed_singleton('snow.Pad')
+        local pad = sdk.get_managed_singleton('snow.Pad')
         if pad then
             appGamepad = pad:get_field('app')
         end
     end
 
     if not hardwareMouse then
-        hardwareMouse = sdk.get_managed_singleton('snow.StmMouse'):get_field('hardmouse')
+        local stmMouse = sdk.get_managed_singleton('snow.StmMouse')
+        if stmMouse then
+            hardwareMouse = stmMouse:get_field('hardmouse')
+        end
     end
 end)
 
