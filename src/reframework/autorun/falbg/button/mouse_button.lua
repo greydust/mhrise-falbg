@@ -1,5 +1,5 @@
 local MouseButton = {
-    [0] = 'Press trigger',
+    [0] = 'Press Trigger',
     [1] = 'Left Click',
     [2] = 'Right Click',
     [4] = 'Wheel Click',

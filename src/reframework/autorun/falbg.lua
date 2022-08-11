@@ -61,16 +61,16 @@ re.on_pre_application_entry('UpdateBehavior', function()
             padType = util.AppGamepad:get_field("_DeviceKindDetails")
             if padType ~= nil then
                 if padType >= 5 and padType <= 9 then
-                    util.PadButton = require('falbg.button.ps_pad_button')
+                    util.PadButton = require('falbg.button.ps_button')
                 elseif padType >= 10 and padType <= 14 then
-                    util.PadButton = require('falbg.button.xbox_pad_button')
+                    util.PadButton = require('falbg.button.xbox_button')
                 elseif padType >= 16 and padType <= 18 then
-                    util.PadButton = require('falbg.button.joy_con_pad_button')
+                    util.PadButton = require('falbg.button.joy_con_button')
                 else
-                    util.PadButton = require('falbg.button.xbox_pad_button')
+                    util.PadButton = require('falbg.button.xbox_button')
                 end
             else
-                util.PadButton = require('falbg.button.xbox_pad_button')
+                util.PadButton = require('falbg.button.xbox_button')
             end
         end
     end

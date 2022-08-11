@@ -1,8 +1,8 @@
-require('falbg.button.joy_con_pad_button')
+require('falbg.button.joy_con_button')
 require('falbg.button.mouse_button')
-require('falbg.button.ps_pad_button')
-require('falbg.button.steam_pad_button')
-require('falbg.button.xbox_pad_button')
+require('falbg.button.ps_button')
+require('falbg.button.steam_button')
+require('falbg.button.xbox_button')
 
 local Util = {
     Settings = {
@@ -15,7 +15,7 @@ local Util = {
     AppGamepad = nil,
     HardwareMouse = nil,
     MouseButton = require('falbg.button.mouse_button'),
-    PadButton = require('falbg.button.xbox_pad_button'),
+    PadButton = require('falbg.button.xbox_button'),
 }
 
 function Util.SafeRequire(name)
@@ -24,6 +24,21 @@ function Util.SafeRequire(name)
         return require(name)
     end
     return nil
+end
+
+function Util.DeepCopy(target, source)
+    if type(source) ~= 'table' then return end
+    
+    for k, v in pairs(source) do
+        if type(v) == 'table' then
+            if type(target[k]) ~= 'table' then
+                target[k] = {}
+            end
+            Util.DeepCopy(target[k], v)
+        else
+            target[k] = v
+        end
+    end
 end
 
 return Util
