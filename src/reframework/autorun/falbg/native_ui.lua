@@ -6,7 +6,7 @@ local NativeUI = {}
 
 function NativeUI.draw()
     modUI.Header('Fully Automatic LBG')
-    changed, value = modUI.CheckBox('Enabled', setting.Settings.enabled, 'Enable this mod.')
+    local changed, value = modUI.CheckBox('Enabled', setting.Settings.enabled, 'Enable this mod.')
     if changed then
         setting.Settings.enabled = value
         setting.SaveSettings()

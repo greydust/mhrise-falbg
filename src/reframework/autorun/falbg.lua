@@ -58,7 +58,7 @@ re.on_pre_application_entry('UpdateBehavior', function()
         local pad = sdk.get_managed_singleton('snow.Pad')
         if pad then
             util.AppGamepad = pad:get_field('app')
-            padType = util.AppGamepad:get_field("_DeviceKindDetails")
+            local padType = util.AppGamepad:get_field("_DeviceKindDetails")
             if padType ~= nil then
                 if padType >= 5 and padType <= 9 then
                     util.PadButton = require('falbg.button.ps_button')
@@ -87,7 +87,7 @@ end)
 
 re.on_draw_ui(function()
     if imgui.tree_node('Fully Automatic LBG') then
-        changed, value = imgui.checkbox('Enabled', setting.Settings.enabled)
+        local changed, value = imgui.checkbox('Enabled', setting.Settings.enabled)
         if changed then
             setting.Settings.enabled = value
             setting.SaveSettings()
